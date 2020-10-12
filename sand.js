@@ -1,5 +1,7 @@
 // universe
 let universe;
+let uWidth = 300;
+let uHeight = 300;
 
 // universe clock, flips between true/false to determine if particles have been updated in this game loop
 let universeClock = true;
@@ -14,14 +16,14 @@ const SPECIES = {
 
 async function run() {
 
-	universe = await prepareRandomUniverse(130, 60);
+	universe = await prepareRandomUniverse(uWidth, uHeight);
 
-	for (let i = 0; i < 100; i++) {
+	for (let i = 0; i < 1000; i++) {
 		await update(universe)
 		universeClock = !universeClock
 
-		printUniverse(universe)
-		await new Promise(r => setTimeout(r, 30));
+		// printUniverse(universe)
+		await new Promise(r => setTimeout(r, 1));
 	}
 }
 
@@ -112,97 +114,112 @@ async function updateSand(x, y, universe) {
 		break;
 
 		default:
-			// nothing needed so
+			universe[x][y].clock = !universe[x][y].clock;
 	}
 }
 
+// rules for water
 async function updateWater(x, y, universe) {
-	if (!universe[x+1] || !universe[x+1][y-1] || !universe[x+1][y+1]) { //particle is on the bottom row
+
+	if (!universe[x+1] || !universe[x+1][y+1] | !universe[x+1][y-1]) { //particle is on the bottom row or on the edges
 		universe[x][y].clock = !universe[x][y].clock;
 		return
 	}
 
-	// cell below me
-	switch(universe[x+1][y].species) {
+	if(universe[x+1][y].species === SPECIES.empty) { // if cell below me is empty
+		// moving particle to cell below
+		universe[x+1][y].species = SPECIES.water; //making particle below me water
+		universe[x+1][y].ra = 1; //making particle below me sand
+		universe[x+1][y].rb = 1; //making particle below me sand
+		universe[x+1][y].clock = !universe[x+1][y].clock;
 
-		case SPECIES.empty:
-			// moving particle to cell below
-			universe[x+1][y].species = SPECIES.water; //making particle below me water
-			universe[x+1][y].ra = 1; //making particle below me water
-			universe[x+1][y].rb = 1; //making particle below me water
-			universe[x+1][y].clock = universe[x+1][y].clock;
+		// clearing the index for the particle we moved
+		universe[x][y].species = SPECIES.empty;
+		universe[x][y].ra = 0;
+		universe[x][y].rb = 0;
+		universe[x][y].clock = !universe[x][y].clock;
+	} else {
+
+		if (universe[x+1][y+1].species === SPECIES.empty) { // the particle below to the right is empty
+			universe[x+1][y+1].species = SPECIES.water; //making particle below me water
+			universe[x+1][y+1].ra = 1; //making particle below me sand
+			universe[x+1][y+1].rb = 1; //making particle below me sand
+			universe[x+1][y+1].clock = !universe[x+1][y+1].clock;
 
 			// clearing the index for the particle we moved
 			universe[x][y].species = SPECIES.empty;
 			universe[x][y].ra = 0;
 			universe[x][y].rb = 0;
 			universe[x][y].clock = !universe[x][y].clock;
-		break;
+		} else if (universe[x+1][y-1].species === SPECIES.empty) { // the particle below to the left is empty
+			universe[x][y-1].species = SPECIES.water; //making particle below me water
+			universe[x][y-1].ra = 1; //making particle below me sand
+			universe[x][y-1].rb = 1; //making particle below me sand
+			universe[x][y-1].clock = !universe[x][y-1].clock;
 
-		default:
+			// clearing the index for the particle we moved
+			universe[x][y].species = SPECIES.empty;
+			universe[x][y].ra = 0;
+			universe[x][y].rb = 0;
+			universe[x][y].clock = !universe[x][y].clock;
+		} else if (universe[x][y+1].species === SPECIES.empty) { // the cell to the right is empty
+			universe[x][y+1].species = SPECIES.water; //making particle below me water
+			universe[x][y+1].ra = 1; //making particle below me sand
+			universe[x][y+1].rb = 1; //making particle below me sand
+			universe[x][y+1].clock = !universe[x][y+1].clock;
 
-			switch(universe[x+1][y-1].species) { // cell to the bottom right
+			// clearing the index for the particle we moved
+			universe[x][y].species = SPECIES.empty;
+			universe[x][y].ra = 0;
+			universe[x][y].rb = 0;
+			universe[x][y].clock = !universe[x][y].clock;
+		} else if (universe[x][y-1].species === SPECIES.empty) {
+			universe[x][y-1].species = SPECIES.water; //making particle below me water
+			universe[x][y-1].ra = 1; //making particle below me sand
+			universe[x][y-1].rb = 1; //making particle below me sand
+			universe[x][y-1].clock = !universe[x][y-1].clock;
 
-				case SPECIES.empty:
-					// moving particle to cell below and to the right
-					universe[x+1][y-1].species = SPECIES.water; 
-					universe[x+1][y-1].ra = 1; 
-					universe[x+1][y-1].rb = 1; 
-					universe[x+1][y-1].clock = !universe[x+1][y-1].clock;
-
-					// clearing the index for the particle we moved
-					universe[x][y].species = SPECIES.empty;
-					universe[x][y].ra = 0;
-					universe[x][y].rb = 0;
-					universe[x][y].clock = !universe[x][y].clock;
-				break;
-
-				default:
-					universe[x][y].clock = !universe[x][y].clock;
-			}
-
-			// cell to the bottom left
-			switch(universe[x+1][y+1].species) {
-
-				case SPECIES.empty:
-					// moving particle to cell below
-					universe[x+1][y+1].species = SPECIES.water; 
-					universe[x+1][y+1].ra = 1; 
-					universe[x+1][y+1].rb = 1; 
-					universe[x+1][y+1].clock = !universe[x+1][y+1].clock;
-
-					// clearing the index for the particle we moved
-					universe[x][y].species = SPECIES.empty;
-					universe[x][y].ra = 0;
-					universe[x][y].rb = 0;
-					universe[x][y].clock = !universe[x][y].clock;
-				break;
-
-				default:
-					universe[x][y].clock = !universe[x][y].clock;
-			}
-
-			// cell next to me
-			// switch(universe[x][y+1].species) {
-			// 	case SPECIES.empty:
-			// 		// moving particle to cell below
-			// 		universe[x][y+1].species = SPECIES.water; 
-			// 		universe[x][y+1].ra = 1; 
-			// 		universe[x][y+1].rb = 1; 
-			// 		universe[x][y+1].clock = !universe[x][y+1].clock;
-
-			// 		// clearing the index for the particle we moved
-			// 		universe[x][y].species = SPECIES.empty;
-			// 		universe[x][y].ra = 0;
-			// 		universe[x][y].rb = 0;
-			// 		universe[x][y].clock = !universe[x][y].clock;
-			// 	break;
-			// 	default:
-			// 		universe[x][y].clock = !universe[x][y].clock;
-			// }
-
+			// clearing the index for the particle we moved
+			universe[x][y].species = SPECIES.empty;
+			universe[x][y].ra = 0;
+			universe[x][y].rb = 0;
+			universe[x][y].clock = !universe[x][y].clock;
+		}
 	}
+
 }
+
+// async function updateWater(x, y, universe) {
+// 	if (!universe[x+1] || !universe[x+1][y-1] || !universe[x+1][y+1]) { //particle is on the bottom row
+// 		universe[x][y].clock = !universe[x][y].clock;
+// 		return
+// 	}
+
+// 	// cell below me
+// 	switch(universe[x+1][y].species) {
+
+// 		case SPECIES.empty:
+// 			// moving particle to cell below
+// 			universe[x+1][y].species = SPECIES.water; //making particle below me water
+// 			universe[x+1][y].ra = 1; //making particle below me water
+// 			universe[x+1][y].rb = 1; //making particle below me water
+// 			universe[x+1][y].clock = universe[x+1][y].clock;
+
+// 			// clearing the index for the particle we moved
+// 			universe[x][y].species = SPECIES.empty;
+// 			universe[x][y].ra = 0;
+// 			universe[x][y].rb = 0;
+// 			universe[x][y].clock = !universe[x][y].clock;
+// 		break;
+
+// 		case SPECIES.water:
+// 			universe[x][y].clock = !universe[x][y].clock;
+// 		break;
+
+// 		default:
+// 			universe[x][y].clock = !universe[x][y].clock;
+// 	}
+// }
 
 
 /* 
@@ -218,7 +235,7 @@ function printUniverse(universe) {
 			if(universe[i][j].species == SPECIES.sand) {
 				buffer += 's'
 			} else if (universe[i][j].species == SPECIES.water){
-				buffer += 'w'
+				buffer += '.'
 			} else {
 				buffer += ' '
 			}
@@ -253,13 +270,53 @@ async function prepareRandomUniverse(width, height) {
 }
 
 function randomSpecies() {
-  let possibilities = [1, 1, 1, 0, 2];
+  let possibilities = [1, 1, 1, 1, 1, 1, 1, 1, 0, 2];
   let index = Math.floor(Math.random() * possibilities.length);
   return possibilities[index];
 }
 
 function randomRegistry () {
 	return Math.floor(Math.random() * 8)
+}
+
+
+/*
+	P5js functions
+*/
+
+function setup() {
+	createCanvas(uWidth, uHeight)
+	pixelDensity(1)
+	// noLoop()
+}
+
+function draw() {
+	background(100);
+
+	loadPixels()
+
+	for(let i = 0; i < uWidth; i++) {
+		for(let j = 0; j < universe[i].length; j++) {
+
+			let index;
+
+			if(universe[i][j].species == SPECIES.sand) {
+				index = (i + j * uWidth) * 4;
+				pixels[index+0] = 207; // red
+				pixels[index+1] = 185; // green
+				pixels[index+2] = 151; // blue
+				pixels[index+3] = 255; // alpha
+			} else if(universe[i][j].species == SPECIES.water) {
+				index = (i + j * uWidth) * 4;
+				pixels[index+0] = 0; // red
+				pixels[index+1] = 0; // green
+				pixels[index+2] = 255; // blue
+				pixels[index+3] = 255; // alpha
+			}
+		}
+	}
+
+	updatePixels()
 }
 
 run()
