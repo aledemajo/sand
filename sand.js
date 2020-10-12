@@ -18,7 +18,7 @@ async function run() {
 
 	universe = await prepareRandomUniverse(uWidth, uHeight);
 
-	for (let i = 0; i < 1000; i++) {
+	while(true) {
 		await update(universe)
 		universeClock = !universeClock
 
@@ -48,9 +48,6 @@ async function update(universe) {
 	        switch(universe[i][j].species) {
 			  case SPECIES.sand:
 			    await updateSand(i, j, universe)
-			    // await new Promise(r => setTimeout(r, 50));
-			    // printUniverse(universe)
-			    // universe[i][j].clock = true;
 			    sandCounter++
 			  break;
 
@@ -62,12 +59,8 @@ async function update(universe) {
 			  	universe[i][j].clock = !universe[i][j].clock;
 			    // particle is empty and does not need to be clock
 			}
-
-
 	    }
 	}
-
-	// console.log('counted ' + sandCounter + ' sand particles')
 }
 
 // rules for sand
@@ -189,39 +182,6 @@ async function updateWater(x, y, universe) {
 
 }
 
-// async function updateWater(x, y, universe) {
-// 	if (!universe[x+1] || !universe[x+1][y-1] || !universe[x+1][y+1]) { //particle is on the bottom row
-// 		universe[x][y].clock = !universe[x][y].clock;
-// 		return
-// 	}
-
-// 	// cell below me
-// 	switch(universe[x+1][y].species) {
-
-// 		case SPECIES.empty:
-// 			// moving particle to cell below
-// 			universe[x+1][y].species = SPECIES.water; //making particle below me water
-// 			universe[x+1][y].ra = 1; //making particle below me water
-// 			universe[x+1][y].rb = 1; //making particle below me water
-// 			universe[x+1][y].clock = universe[x+1][y].clock;
-
-// 			// clearing the index for the particle we moved
-// 			universe[x][y].species = SPECIES.empty;
-// 			universe[x][y].ra = 0;
-// 			universe[x][y].rb = 0;
-// 			universe[x][y].clock = !universe[x][y].clock;
-// 		break;
-
-// 		case SPECIES.water:
-// 			universe[x][y].clock = !universe[x][y].clock;
-// 		break;
-
-// 		default:
-// 			universe[x][y].clock = !universe[x][y].clock;
-// 	}
-// }
-
-
 /* 
 	Utility functions
 */
@@ -291,8 +251,11 @@ function setup() {
 }
 
 function draw() {
-	background(100);
+	
+	// update(universe)
+	// universeClock = !universeClock
 
+	background(100);
 	loadPixels()
 
 	for(let i = 0; i < uWidth; i++) {
@@ -316,7 +279,24 @@ function draw() {
 		}
 	}
 
+	// console.log(mouseX)
 	updatePixels()
+}
+
+function mousePressed() {
+	console.log(mouseX)
+	console.log(mouseY)
+}
+
+function mouseDragged() {
+	universe[mouseX][mouseY].species = SPECIES.sand;
+	universe[mouseX][mouseY].ra = 0;
+	universe[mouseX][mouseY].rb = 0;
+	universe[mouseX][mouseY].clock = !universe[mouseX][mouseY].clock;
+
+	// console.log(universe[mouseX][mouseY])
+	// console.log(mouseX)
+	// console.log(mouseY)
 }
 
 run()
