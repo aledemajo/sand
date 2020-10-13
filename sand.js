@@ -2,6 +2,7 @@
 let universe;
 let uWidth = 300;
 let uHeight = 300;
+let uScale = 1;
 
 // universe clock, flips between true/false to determine if particles have been updated in this game loop
 let universeClock = true;
@@ -11,6 +12,12 @@ const SPECIES = {
     sand: 0,
     empty: 1,
     water: 2,
+    wall: 3,
+}
+
+let drawingTool = {
+	species: SPECIES.sand,
+	size: 1
 }
 
 
@@ -66,48 +73,60 @@ async function update(universe) {
 // rules for sand
 async function updateSand(x, y, universe) {
 
-	if (!universe[x+1]) { //particle is on the bottom row
+	if (!universe[x+1] || !universe[x+1][y+1] | !universe[x+1][y-1]) { //particle is on the bottom row or on the edges
 		universe[x][y].clock = !universe[x][y].clock;
 		return
 	}
 
-	switch(universe[x+1][y].species) {
+	if(universe[x+1][y].species === SPECIES.empty) { // if cell below me is empty
+		// moving particle to cell below
+		universe[x+1][y].species = SPECIES.sand; //making particle below me water
+		universe[x+1][y].ra = 1; //making particle below me sand
+		universe[x+1][y].rb = 1; //making particle below me sand
+		universe[x+1][y].clock = !universe[x+1][y].clock;
 
-		case SPECIES.empty:
-			// moving particle to cell below
-			universe[x+1][y].species = SPECIES.sand; //making particle below me sand
-			universe[x+1][y].ra = 1; //making particle below me sand
-			universe[x+1][y].rb = 1; //making particle below me sand
-			universe[x+1][y].clock = !universe[x+1][y].clock;
+		// clearing the index for the particle we moved
+		universe[x][y].species = SPECIES.empty;
+		universe[x][y].ra = 0;
+		universe[x][y].rb = 0;
+		universe[x][y].clock = !universe[x][y].clock;
+	} else if(universe[x+1][y].species === SPECIES.water) {
+		// moving particle to cell below
+		universe[x+1][y].species = SPECIES.sand; //making particle below me water
+		universe[x+1][y].ra = 1; //making particle below me sand
+		universe[x+1][y].rb = 1; //making particle below me sand
+		universe[x+1][y].clock = !universe[x+1][y].clock;
+
+		// clearing the index for the particle we moved
+		universe[x][y].species = SPECIES.water;
+		universe[x][y].ra = 0;
+		universe[x][y].rb = 0;
+		universe[x][y].clock = !universe[x][y].clock;
+	} else {
+
+		if (universe[x+1][y+1].species === SPECIES.empty) { // the particle below to the right is empty
+			universe[x+1][y+1].species = SPECIES.sand; //making particle below me water
+			universe[x+1][y+1].ra = 1; //making particle below me sand
+			universe[x+1][y+1].rb = 1; //making particle below me sand
+			universe[x+1][y+1].clock = !universe[x+1][y+1].clock;
 
 			// clearing the index for the particle we moved
 			universe[x][y].species = SPECIES.empty;
 			universe[x][y].ra = 0;
 			universe[x][y].rb = 0;
 			universe[x][y].clock = !universe[x][y].clock;
-		break;
+		} else if (universe[x+1][y-1].species === SPECIES.empty) { // the particle below to the left is empty
+			universe[x][y-1].species = SPECIES.sand; //making particle below me water
+			universe[x][y-1].ra = 1; //making particle below me sand
+			universe[x][y-1].rb = 1; //making particle below me sand
+			universe[x][y-1].clock = !universe[x][y-1].clock;
 
-		case SPECIES.sand:
+			// clearing the index for the particle we moved
+			universe[x][y].species = SPECIES.empty;
+			universe[x][y].ra = 0;
+			universe[x][y].rb = 0;
 			universe[x][y].clock = !universe[x][y].clock;
-		break;
-
-		case SPECIES.water:
-
-			//making particle below me sand
-			universe[x+1][y].species = SPECIES.sand;
-			universe[x+1][y].ra = 1;
-			universe[x+1][y].rb = 1;
-			universe[x+1][y].clock = !universe[x+1][y].clock;
-
-			//putting a water particle in my current index
-			universe[x][y].species = SPECIES.water;
-			universe[x][y].ra = 1;
-			universe[x][y].rb = 1;
-			universe[x][y].clock = !universe[x][y].clock;
-		break;
-
-		default:
-			universe[x][y].clock = !universe[x][y].clock;
+		}
 	}
 }
 
@@ -230,7 +249,7 @@ async function prepareRandomUniverse(width, height) {
 }
 
 function randomSpecies() {
-  let possibilities = [1, 1, 1, 1, 1, 1, 1, 1, 0, 2];
+  let possibilities = [1, 1, 1, 1, 1, 1, 1, 0, 2];
   let index = Math.floor(Math.random() * possibilities.length);
   return possibilities[index];
 }
@@ -245,18 +264,16 @@ function randomRegistry () {
 */
 
 function setup() {
-	createCanvas(uWidth, uHeight)
+	createCanvas(uWidth * uScale, uHeight * uScale)
 	pixelDensity(1)
 	// noLoop()
 }
 
 function draw() {
-	
-	// update(universe)
-	// universeClock = !universeClock
-
 	background(100);
+
 	loadPixels()
+
 
 	for(let i = 0; i < uWidth; i++) {
 		for(let j = 0; j < universe[i].length; j++) {
@@ -274,12 +291,32 @@ function draw() {
 				pixels[index+0] = 0; // red
 				pixels[index+1] = 0; // green
 				pixels[index+2] = 255; // blue
-				pixels[index+3] = 255; // alpha
+				pixels[index+3] = random(200, 250); // alpha
+			} else {
+				index = (i + j * uWidth) * 4;
+				pixels[index+0] = random(255); // red
+				pixels[index+1] = 0; // green
+				pixels[index+2] = 0; // blue
+				pixels[index+3] = random(0, 20); // alpha
 			}
 		}
 	}
 
-	// console.log(mouseX)
+	// for(let i = 0; i < universe.length; i++) {
+	// 	for(let j = 0; j < universe[i].length; j++) {
+	// 		if(universe[i][j].species == SPECIES.sand) {
+	// 		  	fill(207,185,151,random(255));
+	// 		} else if(universe[i][j].species == SPECIES.water) {
+	// 		  	fill(0,0,255,255);
+	// 		} else {
+	// 			fill(0,0,0,0)
+	// 		}
+
+	// 		noStroke()
+	// 		circle(i * uScale, j * uScale, uScale);
+	// 	}
+	// }
+
 	updatePixels()
 }
 
@@ -289,14 +326,20 @@ function mousePressed() {
 }
 
 function mouseDragged() {
-	universe[mouseX][mouseY].species = SPECIES.sand;
+	universe[mouseX][mouseY].species = drawingTool.species;
 	universe[mouseX][mouseY].ra = 0;
 	universe[mouseX][mouseY].rb = 0;
 	universe[mouseX][mouseY].clock = !universe[mouseX][mouseY].clock;
+}
 
-	// console.log(universe[mouseX][mouseY])
-	// console.log(mouseX)
-	// console.log(mouseY)
+function setDrawingTool(element) {
+	if(element.id === 'drwSand') {
+		drawingTool.species = SPECIES.sand;
+	} else if(element.id === 'drwWater') {
+		drawingTool.species = SPECIES.water;
+	} else if (element.id === 'drwWall') {
+		console.log('wall not supported yet')
+	}
 }
 
 run()
