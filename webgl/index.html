@@ -48,18 +48,16 @@
 		void main() {
 		  // gl_Position is a special variable a vertex shader is responsible for setting
 		  gl_Position = vec4(coordinates, 1.0);
-		  gl_PointSize = 3.0;
+		  gl_PointSize = 2.0;
 		}
 	</script>
-
-
 
 	<script id="my-fragment-shader" type="x-shader/x-fragment">
 		precision highp float;
 
 		void main() {
 			// gl_FragColor is a special variable a fragment shader is responsible for setting
-			gl_FragColor = vec4(1.0, 0.77, 0.5, 1.0); // return reddish-purple
+			gl_FragColor = vec4(1.000, 0.498, 0.314, 1.0); // return reddish-purple
 		}
 	</script>
 
@@ -80,7 +78,7 @@
 
 		void main() {
 			// gl_FragColor is a special variable a fragment shader is responsible for setting
-			gl_FragColor = vec4(0.118, 0.565, 1.0, 1.0); // return dodger blue
+			gl_FragColor = vec4(0.1, 0.3, 1.0, 1.0); // return dodger blue
 		}
 	</script>
 
