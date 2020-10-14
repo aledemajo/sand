@@ -1,4 +1,4 @@
-let universe = prepareRandomUniverse(100, 100);
+let universe = prepareRandomUniverse(300,300)
 let universeClock = true;
 let uScale = 10;
 
@@ -22,15 +22,6 @@ let vertexBuffer;
 let vertexNumComponents;
 let vertexCount;
 
-for (let i = 0; i < 100; i++) {
-  for (let j = 0; j < 100; j++) {
-    if (universe[j][i].species === SPECIES.sand ) {
-      vertices.push((2.0 * i + 1.0) / 100 - 1.0)
-      vertices.push((2.0 * j + 1.0) / 100 - 1.0)
-    }
-  }
-}
-
 function startup() {
   glCanvas = document.getElementById("glcanvas");
   gl = glCanvas.getContext("webgl");
@@ -52,7 +43,7 @@ function startup() {
   gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
 
-  vertexCount = 100 * 100;
+  vertexCount = 300 * 300;
 
   animateScene();
 }
@@ -60,22 +51,28 @@ function startup() {
 
 function animateScene() {
 
-  //update the universe array
-  console.log('updating universe...')
-  update(universe)
-  universeClock = !universeClock
-
-  //convert it into vertices
-  for (let i = 0; i < universe.length; i++) {
-    for (let j = 0; j < universe[i].length; j++) {
-      vertices.push((2.0 * i + 1.0) / w - 1.0)
-      vertices.push((2.0 * j + 1.0) / h - 1.0)
-    }
-  }
-
   gl.viewport(0, 0, glCanvas.width, glCanvas.height);
   gl.clearColor(0.8, 0.9, 1.0, 1.0);
   gl.clear(gl.COLOR_BUFFER_BIT);
+
+  //update the universe array
+  // console.log('updating universe...')
+  // universe = prepareRandomUniverse(100, 100);
+  update(universe)
+  // console.log(universe[50][10])
+  universeClock = !universeClock
+
+  //convert it into vertices
+  vertices = []
+
+  for (let i = 0; i < universe.length; i++) {
+    for (let j = 0; j < universe[i].length; j++) {
+      if(universe[j][i].species === SPECIES.sand) {
+        vertices.push((2.0 * i + 1.0) / 300 - 1.0)
+        vertices.push((2.0 * j + 1.0) / 300 - 1.0)
+      }
+    }
+  }
 
   // set shader program
   gl.useProgram(shaderProgram);
@@ -213,7 +210,7 @@ function update(universe) {
 // rules for sand
 function updateSand(x, y, universe) {
 
-  console.log('updating sand!')
+  // console.log('updating sand!')
 
   if (!universe[y+1] || !universe[y+1][x+1] || !universe[y+1][x-1]) { //particle is on the bottom row or on the edges
     universe[y][x].clock = !universe[y][x].clock;

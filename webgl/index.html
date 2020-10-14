@@ -8,7 +8,7 @@
 </head>
 
 <body>
-	<canvas id="glcanvas" width="1000" height="1000"></canvas>
+	<canvas id="glcanvas" width="600" height="600"></canvas>
 
 	<script src="index.js"></script>
 <!-- 	<script id="vertex-shader" type="x-shader/x-vertex">
@@ -59,7 +59,28 @@
 
 		void main() {
 			// gl_FragColor is a special variable a fragment shader is responsible for setting
-			gl_FragColor = vec4(1.0, 0.0, 0.5, 1.0); // return reddish-purple
+			gl_FragColor = vec4(1.0, 0.77, 0.5, 1.0); // return reddish-purple
+		}
+	</script>
+
+	<script id="water-vertex-shader" type="x-shader/x-fragment">
+		attribute vec3 coordinates;
+
+		void main() {
+		  // gl_Position is a special variable a vertex shader is responsible for setting
+		  gl_Position = vec4(coordinates, 1.0);
+		  gl_PointSize = 3.0;
+		}
+	</script>
+
+
+
+	<script id="water-fragment-shader" type="x-shader/x-fragment">
+		precision highp float;
+
+		void main() {
+			// gl_FragColor is a special variable a fragment shader is responsible for setting
+			gl_FragColor = vec4(0.118, 0.565, 1.0, 1.0); // return dodger blue
 		}
 	</script>
 
