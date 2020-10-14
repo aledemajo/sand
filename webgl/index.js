@@ -10,8 +10,8 @@ const SPECIES = {
 }
 
 let vertices = []
-let w = 100;
-let h = 100;
+let w = 10;
+let h = 10;
 
 let gl = null;
 let glCanvas = null;
@@ -25,10 +25,9 @@ let vertexCount;
 for (let i = 0; i < 100; i++) {
   for (let j = 0; j < 100; j++) {
     if (universe[j][i].species === SPECIES.sand ) {
-      vertices.push((2.0 * i + 1.0) / 1000 - 1.0)
-      vertices.push((2.0 * j + 1.0) / 1000 - 1.0)
+      vertices.push((2.0 * i + 1.0) / 100 - 1.0)
+      vertices.push((2.0 * j + 1.0) / 100 - 1.0)
     }
-
   }
 }
 
@@ -62,6 +61,7 @@ function startup() {
 function animateScene() {
 
   //update the universe array
+  console.log('updating universe...')
   update(universe)
   universeClock = !universeClock
 
@@ -212,6 +212,8 @@ function update(universe) {
 
 // rules for sand
 function updateSand(x, y, universe) {
+
+  console.log('updating sand!')
 
   if (!universe[y+1] || !universe[y+1][x+1] || !universe[y+1][x-1]) { //particle is on the bottom row or on the edges
     universe[y][x].clock = !universe[y][x].clock;
