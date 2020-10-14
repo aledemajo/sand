@@ -1,10 +1,10 @@
 // universe
 let universe;
-let uWidth = 300;
-let uHeight = 300;
+let uWidth = 500;
+let uHeight = 500;
 let uScale = 1;
 
-// universe clock, flips between true/false to determine if particles have been updated in this game loop
+// universe clock, flips between true/false to determine if universe have been updated in this game loop
 let universeClock = true;
 
 // ENUM for existing species
@@ -219,7 +219,6 @@ async function updateWater(x, y, universe) {
 			universe[y][x].clock = !universe[y][x].clock;
 		}
 	}
-
 }
 
 /* 
@@ -247,7 +246,7 @@ function printUniverse(universe) {
 	console.log(buffer)
 }
 
-// creates a universe filled with randodm particles of a given width and height
+// creates a universe filled with randodm universe of a given width and height
 async function prepareRandomUniverse(width, height) {
 	let universe = [];
 
@@ -270,7 +269,7 @@ async function prepareRandomUniverse(width, height) {
 }
 
 function randomSpecies() {
-  let possibilities = [1, 1, 1, 1, 1, 1, 1, 0,];
+  let possibilities = [1, 1, 1, 1, 1, 1, 1, 0];
   let index = Math.floor(Math.random() * possibilities.length);
   return possibilities[index];
 }
@@ -360,8 +359,8 @@ function setDrawingTool(element) {
 		drawingTool.species = SPECIES.sand;
 	} else if(element.id === 'drwWater') {
 		drawingTool.species = SPECIES.water;
-	} else if (element.id === 'drwWall') {
-		console.log('wall not supported yet')
+	} else if (element.id === 'drwEmpty') {
+		drawingTool.species = SPECIES.empty;
 	}
 }
 
